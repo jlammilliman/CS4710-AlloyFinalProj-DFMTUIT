@@ -1,6 +1,5 @@
 module DFMTUIT
 
-// Maybe ? --> Will need to be fleshed out
 abstract sig Person {}
 some sig Ticket {
 	customer: one Customer,
@@ -15,6 +14,7 @@ some sig Specialist extends Person {
 }
 some sig Reply {
 	ticket: one Ticket,
+	creator: one Person,
 	prev: lone Reply
 }
 
