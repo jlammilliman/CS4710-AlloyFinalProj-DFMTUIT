@@ -1,6 +1,8 @@
 module DFMTUIT
 
-abstract sig Person {}
+abstract sig Person {
+	pReplies: set Reply
+}
 some sig Ticket {
 	customer: one Customer,
 	specialist: lone Specialist,
@@ -18,8 +20,11 @@ some sig Reply {
 	prev: lone Reply
 }
 
-fact CustomerTicketReflexive { customer in ~cusTickets }
-fact SpecialistTicketReflexive { specialist in ~specTickets }
+fact CustomerTicketReflexive { customer = ~cusTickets }
+fact SpecialistTicketReflexive { specialist = ~specTickets }
+fact ReplyTicketReflexive { ticket = ~replies }
+fact PersonReplyRelexive { pReplies = ~creator}
 fact ReplySameTicket { all r: Reply { r.ticket = r.prev.ticket } }
 fact NoSelfReply { all r: Reply { r.prev != r } }
-//fact NoCircularReply { all r: Reply {r not in ^prev } }
+
+pred NoCircularReply[r: Reply] { no r & Reply }
