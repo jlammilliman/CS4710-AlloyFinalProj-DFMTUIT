@@ -1,5 +1,6 @@
 module DFMTUIT
 
+// New relation in Person
 abstract sig Person {
 	pReplies: set Reply
 }
@@ -20,11 +21,15 @@ some sig Reply {
 	prev: lone Reply
 }
 
-fact CustomerTicketReflexive { customer = ~cusTickets }
-fact SpecialistTicketReflexive { specialist = ~specTickets }
-fact ReplyTicketReflexive { ticket = ~replies }
-fact PersonReplyRelexive { pReplies = ~creator}
+// Rename since we used the wrong term
+fact CustomerTicketSymmetric { customer = ~cusTickets }
+fact SpecialistTicketSymmetric { specialist = ~specTickets }
+
+// Make ticket/replies and pReplies/creator symmetric
+fact ReplyTicketSymmetric { ticket = ~replies }
+fact PersonReplySymmetric { pReplies = ~creator}
+
 fact ReplySameTicket { all r: Reply { r.ticket = r.prev.ticket } }
-fact NoSelfReply { all r: Reply { r.prev != r } }
+fact NoSelfReply { all r: Reply { r != r.prev } }
 
 pred NoCircularReply[r: Reply] { no r & Reply }
