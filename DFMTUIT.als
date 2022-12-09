@@ -2,7 +2,6 @@ module DFMTUIT
 
 // Alec Brinker and Justin Milliman
 
-// New relation in Person
 abstract sig Person {
 	pReplies: set Reply
 }
@@ -31,10 +30,35 @@ fact SpecialistTicketSymmetric { specialist = ~specTickets }
 fact ReplyTicketSymmetric { ticket = ~replies }
 fact PersonReplySymmetric { pReplies = ~creator}
 
-fact ReplySameTicket { all r: Reply { r.ticket = r.prev.ticket  || no r.prev } }
-fact NoSelfReply { all r: Reply { r != r.prev } }
+// All replies in a chain are on the same ticket
+fact ReplySameTicket { all r: Reply { r.ticket = r.prev.ticket || no r.prev } }
 
+// No reply can be a descendent of itself
 fact NoCircularReply { all r: Reply { r not in r.^@prev }}
+
+// Four Functions
+	// condense r.prev?
+	//
+	//
+	//
+
+// Four Assertions
+	//
+	//
+	//
+	//
+
+// Four Static Predicates
+	// Ticket has reply with no prev
+	// Reply has descendant with no prev
+	// 
+	//
+
+// Four Dynamic Predicates
+	//
+	//
+	//
+	//
 
 pred show {}
 
