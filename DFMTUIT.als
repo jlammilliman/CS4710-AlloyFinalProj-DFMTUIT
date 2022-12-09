@@ -40,20 +40,25 @@ fact NoCircularReply { all r: Reply { r not in r.descs }}
 fact AllRepliesFromAssoc { all r: Reply { r.creator in r.ticket.assoc }}
 
 // Four Functions
-	// List of people associated with given ticket
+	// Set of people associated with given ticket
 fun assoc[t: Ticket]: univ {
 	t.customer + t.specialist
 }
-	// condense r.^@prev?
+	// Condense r.^prev for ease of reading
 fun descs[r: Reply]: univ {
-	r.^@prev
+	r.^prev
 }
-	//
-
-	//
+	// Set of a person's replies on a given ticket?
+fun tickReplies[p: Person, t: Ticket]: univ {
+	t.replies & p.pReplies
+}
+	// 
 
 // Four Assertions
-	//
+	// Set of replies on a ticket equals sum of assoc's sets of replies
+assert assocTickRepliesSanity {
+	all p: Person, t: Ticket | t.assoc.pReplies = tickReplies[p, t] + tickReplies[t.assoc-p, t]
+}
 	//
 	//
 	//
@@ -65,13 +70,13 @@ pred tickRoot[t: Ticket] {
 }
 	// Reply has descendant with no prev
 pred descsRoot[r: Reply] {
-	some x: Reply |  x in r.descs && no x.prev
+	some x: Reply |  (x in r.descs || x = r) && no x.prev
 }
 	// Reply's prev's creator associated with same ticket
 pred prevAssoc[r: Reply] {
 	r.prev.creator in r.ticket.assoc || no r.prev
 }
-	//
+	// 
 
 // Four Dynamic Predicates
 	//
@@ -79,6 +84,4 @@ pred prevAssoc[r: Reply] {
 	//
 	//
 
-pred show {}
-
-run prevAssoc for 8
+run descsRoot for 8
