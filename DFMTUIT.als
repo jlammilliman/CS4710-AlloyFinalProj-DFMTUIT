@@ -1,5 +1,7 @@
 module DFMTUIT
 
+// Alec Brinker and Justin Milliman
+
 // New relation in Person
 abstract sig Person {
 	pReplies: set Reply
@@ -21,7 +23,7 @@ some sig Reply {
 	prev: lone Reply
 }
 
-// Rename since we used the wrong term
+// Make customer/cusTickers and specialist/specTickets symmetric
 fact CustomerTicketSymmetric { customer = ~cusTickets }
 fact SpecialistTicketSymmetric { specialist = ~specTickets }
 
@@ -29,7 +31,11 @@ fact SpecialistTicketSymmetric { specialist = ~specTickets }
 fact ReplyTicketSymmetric { ticket = ~replies }
 fact PersonReplySymmetric { pReplies = ~creator}
 
-fact ReplySameTicket { all r: Reply { r.ticket = r.prev.ticket } }
+fact ReplySameTicket { all r: Reply { r.ticket = r.prev.ticket  || no r.prev } }
 fact NoSelfReply { all r: Reply { r != r.prev } }
 
-pred NoCircularReply[r: Reply] { no r & Reply }
+fact NoCircularReply { all r: Reply { r not in r.^@prev }}
+
+pred show {}
+
+run show for 8
