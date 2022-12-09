@@ -34,12 +34,22 @@ fact PersonReplySymmetric { pReplies = ~creator}
 fact ReplySameTicket { all r: Reply { r.ticket = r.prev.ticket || no r.prev } }
 
 // No reply can be a descendent of itself
-fact NoCircularReply { all r: Reply { r not in r.^@prev }}
+fact NoCircularReply { all r: Reply { r not in r.descs }}
+
+// All replies on ticket are from people associated with that ticket
+fact AllRepliesFromAssoc { all r: Reply { r.creator in r.ticket.assoc }}
 
 // Four Functions
-	// condense r.prev?
+	// List of people associated with given ticket
+fun assoc[t: Ticket]: univ {
+	t.customer + t.specialist
+}
+	// condense r.^@prev?
+fun descs[r: Reply]: univ {
+	r.^@prev
+}
 	//
-	//
+
 	//
 
 // Four Assertions
@@ -49,9 +59,18 @@ fact NoCircularReply { all r: Reply { r not in r.^@prev }}
 	//
 
 // Four Static Predicates
-	// Ticket has reply with no prev
+	// Ticket has reply with no prev or no replies
+pred tickRoot[t: Ticket] {
+	some x: Reply | (x in t.replies && no x.prev) || no t.replies
+}
 	// Reply has descendant with no prev
-	// 
+pred descsRoot[r: Reply] {
+	some x: Reply |  x in r.descs && no x.prev
+}
+	// Reply's prev's creator associated with same ticket
+pred prevAssoc[r: Reply] {
+	r.prev.creator in r.ticket.assoc || no r.prev
+}
 	//
 
 // Four Dynamic Predicates
@@ -62,4 +81,4 @@ fact NoCircularReply { all r: Reply { r not in r.^@prev }}
 
 pred show {}
 
-run show for 8
+run prevAssoc for 8
