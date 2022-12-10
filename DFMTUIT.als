@@ -48,35 +48,41 @@ fun assoc[t: Ticket]: univ {
 fun descs[r: Reply]: univ {
 	r.^prev
 }
-	// Set of a person's replies on a given ticket?
+	// Set of a person's replies on a given ticket
 fun tickReplies[p: Person, t: Ticket]: univ {
 	t.replies & p.pReplies
 }
-	// 
+	// Inverse of prev
+fun next[r: Reply]: univ {
+	prev.r
+}
 
 // Four Assertions
 	// Set of replies on a ticket equals sum of assoc's sets of replies
 assert assocTickRepliesSanity {
 	all p: Person, t: Ticket | t.assoc.pReplies = tickReplies[p, t] + tickReplies[t.assoc-p, t]
 }
-	//
+	// 
 	//
 	//
 
 // Four Static Predicates
-	// Ticket has reply with no prev or no replies
+	// Ticket has at least one root, i.e., reply with no prev, or no replies
 pred tickRoot[t: Ticket] {
-	some x: Reply | (x in t.replies && no x.prev) || no t.replies
+	(some x: Reply | (x in t.replies && no x.prev)) || no t.replies
 }
-	// Reply has descendant with no prev
+	// Reply has descendant with no prev, or is itself a root
 pred descsRoot[r: Reply] {
 	some x: Reply |  (x in r.descs || x = r) && no x.prev
 }
-	// Reply's prev's creator associated with same ticket
+	// Reply has leaf, i.e., reply with no next
+pred chainEnds[r: Reply] {
+	some x: Reply | (x in ^prev.r || x = r) && no x.next
+}
+	// Reply's prev's creator associated with same ticket, or reply is root
 pred prevAssoc[r: Reply] {
 	r.prev.creator in r.ticket.assoc || no r.prev
 }
-	// 
 
 // Four Dynamic Predicates
 	//
@@ -84,4 +90,4 @@ pred prevAssoc[r: Reply] {
 	//
 	//
 
-run descsRoot for 8
+run chainEnds for 8
