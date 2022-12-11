@@ -2,6 +2,7 @@ module DFMTUIT
 
 // Alec Brinker and Justin Milliman
 
+// Sigs
 abstract sig Person {
 	pReplies: set Reply
 }
@@ -22,6 +23,7 @@ some sig Reply {
 	prev: lone Reply
 }
 
+// Facts
 // Make customer/cusTickers and specialist/specTickets symmetric
 fact CustomerTicketSymmetric { customer = ~cusTickets }
 fact SpecialistTicketSymmetric { specialist = ~specTickets }
@@ -56,17 +58,24 @@ fun tickReplies[p: Person, t: Ticket]: univ {
 fun next[r: Reply]: univ {
 	prev.r
 }
+	// Generate chain
+fun chain[r: Reply]: univ {
+	r + r.^prev + ^prev.r
+}
 
-// Four Assertions
+// Assertions
 	// Set of replies on a ticket equals sum of assoc's sets of replies
 assert assocTickRepliesSanity {
 	all p: Person, t: Ticket | t.assoc.pReplies = tickReplies[p, t] + tickReplies[t.assoc-p, t]
 }
-	// 
+	// R's chain is same as r.prev
+assert chainGenSanity {
+	all r: Reply | r.chain = r.prev.chain || no r.prev
+}
 	//
 	//
 
-// Four Static Predicates
+// Static Predicates
 	// Ticket has at least one root, i.e., reply with no prev, or no replies
 pred tickRoot[t: Ticket] {
 	(some x: Reply | (x in t.replies && no x.prev)) || no t.replies
@@ -84,11 +93,11 @@ pred prevAssoc[r: Reply] {
 	r.prev.creator in r.ticket.assoc || no r.prev
 }
 
-// Four Dynamic Predicates
+// Dynamic Predicates <- All will require some sort of new ordering module, likely util/time
 	// Assign specialist
-	//
-	//
-	//
+	// Unassign specialist
+	// Post reply?
+	// Delete reply? <- This and above would require a new relation/sig to represent 'unposted' replies
 
 // Run multiple
 pred show {
@@ -96,6 +105,8 @@ pred show {
 	all r: Reply | r.descsRoot
 	all r: Reply | r.chainEnds
 	all r: Reply | r.prevAssoc
+
+	// Dynamic pred(s)
 }
 
 run show for 8
