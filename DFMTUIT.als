@@ -85,9 +85,17 @@ pred prevAssoc[r: Reply] {
 }
 
 // Four Dynamic Predicates
-	//
+	// Assign specialist
 	//
 	//
 	//
 
-run chainEnds for 8
+// Run multiple
+pred show {
+	all t: Ticket | t.tickRoot
+	all r: Reply | r.descsRoot
+	all r: Reply | r.chainEnds
+	all r: Reply | r.prevAssoc
+}
+
+run show for 8
