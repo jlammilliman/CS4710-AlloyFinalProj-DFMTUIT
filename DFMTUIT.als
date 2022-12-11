@@ -55,7 +55,7 @@ fun tickReplies[p: Person, t: Ticket]: univ {
 	t.replies & p.pReplies
 }
 	// Inverse of prev
-fun next[r: Reply]: univ {
+fun post[r: Reply]: univ {
 	prev.r
 }
 	// Generate chain
@@ -66,14 +66,20 @@ fun chain[r: Reply]: univ {
 // Assertions
 	// T.replies is composed of tickReplies of all associated people
 assert assocTickRepliesSanity {
-	all t: Ticket | tickReplies[t.assoc,t] = t.replies
+	all t: Ticket | tickReplies[t.assoc, t] = t.replies
 }
 	// R's chain is same as r.prev's chain
 assert chainGenSanity {
 	all r: Reply | r.chain in r.prev.chain || no r.prev
 }
-	//
-	//
+	// Chain-Root sanity
+assert chainRootSanity {
+	all r: Reply | no r.prev => (r + ^prev.r) = r.chain
+}
+	// Chain-Leaf sanity
+assert chainLeafSanity {
+	all r: Reply | no r.post => (r + r.descs) = r.chain
+}
 
 // Static Predicates
 	// Ticket has at least one root, i.e., reply with no prev, or no replies
@@ -84,19 +90,22 @@ pred tickRoot[t: Ticket] {
 pred descsRoot[r: Reply] {
 	one x: Reply |  (x in r.descs || x = r) && no x.prev
 }
-	// Reply has leaf, i.e., reply with no next
+	// Reply has leaf, i.e., reply with no post
 pred chainEnds[r: Reply] {
-	one x: Reply | (x in ^prev.r || x = r) && no x.next
+	one x: Reply | (x in ^prev.r || x = r) && no x.post
 }
 	// Reply's prev's creator associated with same ticket, or reply is root
 pred prevAssoc[r: Reply] {
 	r.prev.creator in r.ticket.assoc || no r.prev
 }
 
-// Dynamic Predicates <- All will require some sort of new ordering module, likely util/time
+// Dynamic Predicates
 	// Assign specialist
+
 	// Unassign specialist
+
 	// Post reply?
+
 	// Delete reply? <- This and above would require a new relation/sig to represent 'unposted' replies
 
 // Run multiple
@@ -105,10 +114,13 @@ pred show {
 	all r: Reply | r.descsRoot
 	all r: Reply | r.chainEnds
 	all r: Reply | r.prevAssoc
+	some s: Specialist | s != Specialist
 
 	// Dynamic pred(s)
 }
 
-check assocTickRepliesSanity
+//check assocTickRepliesSanity
 //check chainGenSanity
-run show for 8
+//check chainRootSanity
+//check chainLeafSanity
+run show for 4
