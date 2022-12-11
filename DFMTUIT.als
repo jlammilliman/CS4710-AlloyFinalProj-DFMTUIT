@@ -41,7 +41,7 @@ fact NoCircularReply { all r: Reply { r not in r.descs }}
 // All replies on ticket are from people associated with that ticket
 fact AllRepliesFromAssoc { all r: Reply { r.creator in r.ticket.assoc }}
 
-// Four Functions
+// Functions
 	// Set of people associated with given ticket
 fun assoc[t: Ticket]: univ {
 	t.customer + t.specialist
@@ -60,17 +60,17 @@ fun next[r: Reply]: univ {
 }
 	// Generate chain
 fun chain[r: Reply]: univ {
-	r + r.^prev + ^prev.r
+	r + r.descs + ^prev.r
 }
 
 // Assertions
-	// Set of replies on a ticket equals sum of assoc's sets of replies
+	// T.replies is composed of tickReplies of all associated people
 assert assocTickRepliesSanity {
-	all p: Person, t: Ticket | t.assoc.pReplies = tickReplies[p, t] + tickReplies[t.assoc-p, t]
+	all t: Ticket | tickReplies[t.assoc,t] = t.replies
 }
-	// R's chain is same as r.prev
+	// R's chain is same as r.prev's chain
 assert chainGenSanity {
-	all r: Reply | r.chain = r.prev.chain || no r.prev
+	all r: Reply | r.chain in r.prev.chain || no r.prev
 }
 	//
 	//
@@ -82,11 +82,11 @@ pred tickRoot[t: Ticket] {
 }
 	// Reply has descendant with no prev, or is itself a root
 pred descsRoot[r: Reply] {
-	some x: Reply |  (x in r.descs || x = r) && no x.prev
+	one x: Reply |  (x in r.descs || x = r) && no x.prev
 }
 	// Reply has leaf, i.e., reply with no next
 pred chainEnds[r: Reply] {
-	some x: Reply | (x in ^prev.r || x = r) && no x.next
+	one x: Reply | (x in ^prev.r || x = r) && no x.next
 }
 	// Reply's prev's creator associated with same ticket, or reply is root
 pred prevAssoc[r: Reply] {
@@ -109,4 +109,6 @@ pred show {
 	// Dynamic pred(s)
 }
 
+check assocTickRepliesSanity
+//check chainGenSanity
 run show for 8
